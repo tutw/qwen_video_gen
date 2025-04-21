@@ -1,29 +1,26 @@
-name: Run Script Manually
+name: Selenium Test
 
 on:
-  workflow_dispatch:  # Permite ejecutar el workflow manualmente
+  push:
+    branches:
+      - main
 
 jobs:
-  run-script:
-    runs-on: ubuntu-latest  # Usa un runner de Ubuntu
+  selenium:
+    runs-on: ubuntu-latest
 
     steps:
-      # Paso 1: Checkout del código del repositorio
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # Paso 2: Configurar Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Cambia a la versión de Python que necesites
+          python-version: 3.9
 
-      # Paso 3: Instalar dependencias (incluye Selenium)
       - name: Install dependencies
         run: |
-          pip install selenium
-          # Agrega aquí otras dependencias si las necesitas
+          pip install selenium webdriver-manager
 
-      # Paso 4: Ejecutar el script
-      - name: Run script.py
+      - name: Run script
         run: python script.py
