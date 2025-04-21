@@ -43,19 +43,6 @@ try:
         logging.info(f"Accediendo a la URL principal: {home_url}")
         driver.get(home_url)
 
-        # Localizar y hacer clic en el botón "Iniciar sesión"
-        logging.debug("Buscando y pulsando el botón 'Iniciar sesión'...")
-        login_button = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Iniciar sesión"))
-        )
-        login_button.click()
-
-        # Esperar a que la página de inicio de sesión cargue
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div[1]/div/div/form'))
-        )
-        logging.info("Página de inicio de sesión cargada.")
-
         # Obtener credenciales desde los secretos de GitHub
         email = os.environ.get("LOGIN_EMAIL")
         password = os.environ.get("LOGIN_PASSWORD")
@@ -74,10 +61,14 @@ try:
         )
         password_box.send_keys(password)
 
-        # Pulsar Enter para enviar el formulario
-        password_box.send_keys(Keys.RETURN)
+        # Localizar y hacer clic en el botón de inicio de sesión
+        logging.debug("Buscando el botón de inicio de sesión...")
+        login_button = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div/div/div/form/div[3]/div/button'))
+        )
+        login_button.click()
 
-        # Esperar a que la página principal cargue
+        # Esperar a que se complete el inicio de sesión
         WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.ID, "chat-input"))
         )
