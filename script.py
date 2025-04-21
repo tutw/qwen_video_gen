@@ -7,6 +7,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+import os
 import time
 import xml.etree.ElementTree as ET
 
@@ -39,15 +40,45 @@ try:
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
-        # Acceder a la URL
+        # Acceder a la URL de inicio de sesión
+        login_url = "https://chat.qwen.ai/login"
+        logging.info(f"Accediendo a la URL de inicio de sesión: {login_url}")
+        driver.get(login_url)
+
+        # Obtener credenciales de las variables de entorno
+        email = os.environ.get("LOGIN_EMAIL")
+        password = os.environ.get("LOGIN_PASSWORD")
+        if not email or not password:
+            raise ValueError("Las credenciales no están configuradas en las variables de entorno.")
+
+        # Completar el formulario de inicio de sesión
+        logging.debug("Completando el formulario de inicio de sesión...")
+        email_box = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "login_email"))
+        )
+        email_box.send_keys(email)
+
+        password_box = driver.find_element(By.ID, "login_password")
+        password_box.send_keys(password)
+        password_box.send_keys(Keys.RETURN)
+
+        # Esperar a que el inicio de sesión sea exitoso
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//textarea"))
+        )
+        logging.info("Inicio de sesión exitoso.")
+
+        # Acceder a la URL principal
         url = "https://chat.qwen.ai/c/07a3d948-a17e-461a-90e6-41675255ec6c"
-        logging.info(f"Accediendo a la URL: {url}")
+        logging.info(f"Accediendo a la URL principal: {url}")
         driver.get(url)
         time.sleep(5)  # Esperar que la página cargue completamente
 
         # Encontrar la caja de texto donde se escribe el prompt
         logging.debug("Buscando la caja de texto para el prompt...")
-        prompt_box = driver.find_element(By.TAG_NAME, 'textarea')
+        prompt_box = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.TAG_NAME, "textarea"))
+        )
         prompt_text = "un gato jugando con una bola de papel"
         logging.info(f"Enviando prompt: {prompt_text}")
         prompt_box.send_keys(prompt_text)
