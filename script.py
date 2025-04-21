@@ -1,13 +1,11 @@
 import logging  # Importa el módulo logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-import time
 
 # Configuración del sistema de logging
 logging.basicConfig(
@@ -94,8 +92,15 @@ try:
             EC.presence_of_element_located((By.XPATH, '//*[@id="chat-input"]'))
         )
         chat_input.send_keys("gato jugando con pelota de tennis")
-        chat_input.send_keys(Keys.RETURN)
-        logging.info("Prompt enviado correctamente.")
+        logging.info("Prompt ingresado correctamente.")
+
+        # Hacer clic en el botón de envío
+        logging.debug("Haciendo clic en el botón para enviar el mensaje...")
+        send_button = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="send-message-button"]'))
+        )
+        send_button.click()
+        logging.info("Mensaje enviado correctamente.")
 
         # Esperar a que se genere la URL del video
         logging.debug("Esperando a que se genere la URL del video...")
