@@ -1,7 +1,10 @@
 import logging  # Importa el módulo logging
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Configuración del sistema de logging
@@ -38,13 +41,20 @@ try:
         logging.info(f"Accediendo a la URL: {url}")
         driver.get(url)
 
-        # Confirmar si se ha accedido correctamente
-        if "home" in driver.current_url:
-            logging.info("Acceso exitoso a la URL.")
-            print("Acceso exitoso a la URL.")
-        else:
-            logging.error("No se pudo acceder a la URL correctamente.")
-            print("No se pudo acceder a la URL correctamente.")
+        # Confirmar si la página se ha cargado correctamente
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+        logging.info("Página cargada correctamente.")
+
+        # Localizar y hacer clic en el botón especificado
+        logging.debug("Buscando el botón para hacer clic...")
+        button = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div/div/div/form/div[3]/div/button'))
+        )
+        button.click()
+        logging.info("Se hizo clic en el botón correctamente.")
+
     finally:
         # Cerrar el navegador
         logging.debug("Cerrando el navegador...")
@@ -52,4 +62,4 @@ try:
         logging.info("Navegador cerrado.")
 
 except Exception as e:
-    logging.critical("Fallo crítico al iniciar el script:", exc_info=True)
+    logging.critical("Error crítico durante la ejecución:", exc_info=True)
