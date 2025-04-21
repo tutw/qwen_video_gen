@@ -8,7 +8,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import os
-import time
 
 # Configuración del sistema de logging
 logging.basicConfig(
@@ -39,10 +38,23 @@ try:
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
-        # Acceder a la URL de inicio de sesión
-        login_url = "https://chat.qwen.ai/auth?action=signin"
-        logging.info(f"Accediendo a la URL de inicio de sesión: {login_url}")
-        driver.get(login_url)
+        # Acceder a la URL de inicio
+        home_url = "https://chat.qwen.ai/auth?action=home"
+        logging.info(f"Accediendo a la URL principal: {home_url}")
+        driver.get(home_url)
+
+        # Localizar y hacer clic en el botón "Iniciar sesión"
+        logging.debug("Buscando y pulsando el botón 'Iniciar sesión'...")
+        login_button = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.LINK_TEXT, "Iniciar sesión"))
+        )
+        login_button.click()
+
+        # Esperar a que la página de inicio de sesión cargue
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div[1]/div/div/form'))
+        )
+        logging.info("Página de inicio de sesión cargada.")
 
         # Obtener credenciales desde los secretos de GitHub
         email = os.environ.get("LOGIN_EMAIL")
@@ -52,32 +64,30 @@ try:
 
         # Completar el formulario de inicio de sesión
         logging.debug("Completando el formulario de inicio de sesión...")
-
-        # Localizar el campo de correo electrónico
         email_box = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.ID, "login-email"))
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div[1]/div/div/form/div[2]/div[1]/input'))
         )
         email_box.send_keys(email)
 
-        # Localizar el campo de contraseña
         password_box = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.XPATH, '//input[@type="password" and @placeholder="Contraseña"]'))
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div[1]/div/div/form/div[2]/div[2]/span/input'))
         )
         password_box.send_keys(password)
 
-        # Localizar y hacer clic en el botón de inicio de sesión
-        login_button = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, '#chat-container > div.sticky.top-0.z-40.navbar-bg-mobile.-mb-8.flex.w-full.items-center.px-1\\.5.py-1\\.5 > div > div > div.flex.h-\\[2\\.5rem\\].flex-none.items-center.self-start.text-gray-600.dark\\:text-gray-400 > div > button'))
-        )
-        login_button.click()
+        # Pulsar Enter para enviar el formulario
+        password_box.send_keys(Keys.RETURN)
 
-        # Esperar a que se complete el inicio de sesión
+        # Esperar a que la página principal cargue
         WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.ID, "chat-input"))
         )
         logging.info("Inicio de sesión exitoso.")
     except Exception as e:
         logging.error("Error durante la ejecución:", exc_info=True)
+        # Guardar el HTML para diagnóstico
+        with open("page_source.html", "w", encoding="utf-8") as file:
+            file.write(driver.page_source)
+        logging.info("Se guardó el HTML de la página para depuración.")
     finally:
         # Cerrar el navegador
         logging.debug("Cerrando el navegador...")
