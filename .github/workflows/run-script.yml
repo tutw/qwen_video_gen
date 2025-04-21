@@ -1,6 +1,5 @@
-name: Run Script
+name: Run Script with Login
 
-# Permitir ejecución manual
 on:
   workflow_dispatch:
 
@@ -9,21 +8,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Paso 1: Clonar el repositorio
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Paso 2: Configurar Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
-      # Paso 3: Instalar dependencias
       - name: Install dependencies
         run: |
           pip install selenium webdriver-manager
 
-      # Paso 4: Ejecutar el script
-      - name: Run script.py
+      - name: Run script with secure credentials
+        env:
+          LOGIN_EMAIL: ${{ secrets.LOGIN_EMAIL }}
+          LOGIN_PASSWORD: ${{ secrets.LOGIN_PASSWORD }}
         run: python script.py
