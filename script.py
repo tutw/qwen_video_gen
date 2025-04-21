@@ -2,18 +2,17 @@ import logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import time
-import os
 
 # Configurar el sistema de logging
 logging.basicConfig(
-    level=logging.DEBUG,  # Cambia a logging.INFO si no necesitas tantos detalles
+    level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("debug.log"),  # Guarda los logs en un archivo
-        logging.StreamHandler()  # También muestra los logs en la consola
+        logging.FileHandler("debug.log"),  # Registrar en un archivo
+        logging.StreamHandler()  # Mostrar en consola
     ]
 )
 
@@ -23,18 +22,14 @@ try:
     # Configurar opciones de Chrome
     logging.debug("Configurando opciones de Chrome...")
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Ejecutar en modo headless (sin interfaz gráfica)
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")  # Requerido en algunos entornos como servidores
-    chrome_options.add_argument("--disable-dev-shm-usage")  # Manejo de memoria compartida
+    chrome_options.add_argument("--headless")  # Ejecución sin interfaz gráfica
+    chrome_options.add_argument("--disable-gpu")  # Deshabilitar GPU
+    chrome_options.add_argument("--no-sandbox")  # Necesario en entornos como GitHub Actions
+    chrome_options.add_argument("--disable-dev-shm-usage")  # Evitar problemas de memoria compartida
 
-    # Configurar el servicio de ChromeDriver
-    logging.debug("Configurando el servicio de ChromeDriver...")
-    chromedriver_path = "chromedriver"  # Asegúrate de que el binario de ChromeDriver esté en tu PATH o especifica la ruta completa
-    service = Service(chromedriver_path)
-
-    logging.debug("Inicializando el navegador Chrome...")
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    # Configurar ChromeDriver con webdriver-manager
+    logging.debug("Inicializando el navegador Chrome con webdriver-manager...")
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
 
     try:
         # Acceder a la URL
@@ -49,7 +44,7 @@ try:
         prompt_text = "un gato jugando con una bola de papel"
         logging.info(f"Enviando prompt: {prompt_text}")
         prompt_box.send_keys(prompt_text)
-        prompt_box.send_keys(Keys.RETURN)  # Simular presionar Enter
+        prompt_box.send_keys(Keys.RETURN)
         time.sleep(10)  # Esperar que se genere el video
 
         # Buscar el enlace al video generado
