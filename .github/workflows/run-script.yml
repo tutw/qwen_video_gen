@@ -1,26 +1,29 @@
-name: Selenium Test
+name: Run Script
 
+# Permitir ejecución manual
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  selenium:
+  execute-script:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # Paso 1: Clonar el repositorio
+      - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Paso 2: Configurar Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
+      # Paso 3: Instalar dependencias
       - name: Install dependencies
         run: |
           pip install selenium webdriver-manager
 
-      - name: Run script
+      # Paso 4: Ejecutar el script
+      - name: Run script.py
         run: python script.py
