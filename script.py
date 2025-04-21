@@ -1,5 +1,4 @@
 import logging
-import tempfile
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -24,16 +23,11 @@ try:
     # Configuración de Chrome
     logging.debug("Configurando opciones de Chrome...")
     chrome_options = Options()
-    # Descomentar para ejecutar en modo headless
-    # chrome_options.add_argument("--headless")
+    # Descomenta la siguiente línea para ver la ejecución en un navegador visible
+    # chrome_options.add_argument("--headless")  # Para ejecución sin interfaz gráfica
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-
-    # Crear un directorio temporal único para evitar conflictos con user-data-dir
-    user_data_dir = tempfile.mkdtemp()
-    logging.debug(f"Usando directorio temporal para user-data-dir: {user_data_dir}")
-    chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
 
     # Inicializar el servicio de ChromeDriver
     logging.debug("Inicializando el servicio de ChromeDriver...")
