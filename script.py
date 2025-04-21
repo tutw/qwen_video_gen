@@ -1,4 +1,5 @@
 import logging
+import tempfile  # Para crear directorios temporales
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -28,6 +29,10 @@ try:
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+
+    # Crear un directorio temporal único para evitar conflictos de `user-data-dir`
+    user_data_dir = tempfile.mkdtemp()
+    chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
 
     # Inicializar el servicio de ChromeDriver
     logging.debug("Inicializando el servicio de ChromeDriver...")
