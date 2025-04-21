@@ -1,0 +1,30 @@
+name: Run Script Manually
+
+on:
+  workflow_dispatch:  # Permite ejecutar el workflow manualmente
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest  # Usa un runner de Ubuntu
+
+    steps:
+      # Paso 1: Checkout del código del repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Paso 2: Configurar Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'  # Cambia a la versión de Python que necesites
+
+      # Paso 3: Instalar dependencias (si hay un archivo requirements.txt)
+      - name: Install dependencies
+        run: |
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+
+      # Paso 4: Ejecutar el script
+      - name: Run script.py
+        run: python script.py
