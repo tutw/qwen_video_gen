@@ -1,4 +1,7 @@
 import logging
+import os
+import signal
+import subprocess  # Para ejecutar comandos del sistema
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -17,19 +20,31 @@ logging.basicConfig(
     ]
 )
 
+def kill_chrome_processes():
+    try:
+        logging.info("Cerrando procesos de Chrome...")
+        # Cierra todos los procesos relacionados con Chrome
+        if os.name == 'posix':  # Para sistemas basados en Unix (Linux/macOS)
+            subprocess.run(["pkill", "-f", "chrome"], check=False)
+        elif os.name == 'nt':  # Para Windows
+            subprocess.run(["taskkill", "/F", "/IM", "chrome.exe"], check=False)
+        logging.info("Procesos de Chrome cerrados correctamente.")
+    except Exception as e:
+        logging.warning("No se pudieron cerrar los procesos de Chrome.", exc_info=True)
+
 logging.info("Iniciando el script...")
+
+# Cerrar procesos de Chrome antes de iniciar
+kill_chrome_processes()
 
 try:
     # Configuración de Chrome
     logging.debug("Configurando opciones de Chrome...")
     chrome_options = Options()
-    # Descomentar la siguiente línea para ejecutar en modo headless
-    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
 
-    # Eliminar el uso de `--user-data-dir` para evitar conflictos
     # Inicializar el servicio de ChromeDriver
     logging.debug("Inicializando el servicio de ChromeDriver...")
     service = Service(ChromeDriverManager().install())
@@ -48,7 +63,6 @@ try:
         logging.info("Página cargada correctamente.")
 
         # Botón inicial
-        logging.debug("Buscando el botón inicial para hacer clic...")
         initial_button = WebDriverWait(driver, 30).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div/div/div/form/div[3]/div/button'))
         )
@@ -56,7 +70,6 @@ try:
         logging.info("Se hizo clic en el botón inicial correctamente.")
 
         # Rellenar el campo de entrada con el prompt
-        logging.debug("Rellenando el campo de entrada con el prompt...")
         chat_input = WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.XPATH, '//*[@id="chat-input"]'))
         )
@@ -64,7 +77,6 @@ try:
         logging.info("Prompt ingresado correctamente.")
 
         # Esperar a que el botón de envío aparezca
-        logging.debug("Esperando a que el botón de envío esté disponible...")
         send_button = WebDriverWait(driver, 30).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="send-message-button"]'))
         )
