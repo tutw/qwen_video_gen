@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+import xml.etree.ElementTree as ET
 
 # Configurar el sistema de logging
 logging.basicConfig(
@@ -57,12 +58,21 @@ try:
         video_url = video_element.get_attribute('href')
         logging.info(f"URL del video generado: {video_url}")
 
-        # Guardar la URL en un archivo de texto
-        output_file = "video_url.txt"
-        logging.debug(f"Guardando la URL en el archivo: {output_file}")
-        with open(output_file, "w") as file:
-            file.write(f"URL del video generado: {video_url}\n")
-        logging.info(f"URL guardada correctamente en {output_file}")
+        # Crear un archivo XML con el prompt y la URL
+        output_file = "url.xml"
+        logging.debug(f"Creando el archivo XML en: {output_file}")
+        
+        root = ET.Element("VideoData")
+        prompt_element = ET.SubElement(root, "Prompt")
+        prompt_element.text = prompt_text
+        url_element = ET.SubElement(root, "URL")
+        url_element.text = video_url
+        
+        tree = ET.ElementTree(root)
+        with open(output_file, "wb") as file:
+            tree.write(file, encoding="utf-8", xml_declaration=True)
+        
+        logging.info(f"Archivo XML creado correctamente en {output_file}")
 
     except Exception as e:
         logging.error("Ocurrió un error durante la ejecución principal:", exc_info=True)
