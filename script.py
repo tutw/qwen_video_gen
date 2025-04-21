@@ -76,15 +76,6 @@ try:
         send_button.click()
         logging.info("Mensaje enviado correctamente.")
 
-        # Esperar a que se genere la URL del video
-        logging.debug("Esperando a que se genere la URL del video...")
-        video_url_element = WebDriverWait(driver, 60).until(
-            EC.presence_of_element_located((By.XPATH, '//a[contains(@href, "http")]'))  # Busca un enlace con "http"
-        )
-        video_url = video_url_element.get_attribute("href")
-        logging.info(f"Video generado: {video_url}")
-        print(f"Video generado: {video_url}")
-
     finally:
         # Cerrar el navegador
         logging.debug("Cerrando el navegador...")
