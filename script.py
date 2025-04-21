@@ -44,6 +44,12 @@ try:
         logging.info(f"Accediendo a la URL de inicio de sesión: {login_url}")
         driver.get(login_url)
 
+        # Obtener credenciales desde los secretos de GitHub
+        email = os.environ.get("LOGIN_EMAIL")
+        password = os.environ.get("LOGIN_PASSWORD")
+        if not email or not password:
+            raise ValueError("Las credenciales no están configuradas en las variables de entorno.")
+
         # Completar el formulario de inicio de sesión
         logging.debug("Completando el formulario de inicio de sesión...")
 
@@ -51,13 +57,13 @@ try:
         email_box = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.ID, "login-email"))
         )
-        email_box.send_keys("tu_email@example.com")
+        email_box.send_keys(email)
 
         # Localizar el campo de contraseña
         password_box = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.XPATH, '//input[@type="password" and @placeholder="Contraseña"]'))
         )
-        password_box.send_keys("tu_contraseña_segura")
+        password_box.send_keys(password)
 
         # Localizar y hacer clic en el botón de inicio de sesión
         login_button = WebDriverWait(driver, 20).until(
