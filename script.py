@@ -1,6 +1,6 @@
 import logging
 import os
-import signal
+import tempfile  # Para directorios temporales
 import subprocess  # Para ejecutar comandos del sistema
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -21,12 +21,12 @@ logging.basicConfig(
 )
 
 def kill_chrome_processes():
+    """Cierra cualquier proceso existente de Chrome."""
     try:
         logging.info("Cerrando procesos de Chrome...")
-        # Cierra todos los procesos relacionados con Chrome
-        if os.name == 'posix':  # Para sistemas basados en Unix (Linux/macOS)
+        if os.name == 'posix':  # Linux/MacOS
             subprocess.run(["pkill", "-f", "chrome"], check=False)
-        elif os.name == 'nt':  # Para Windows
+        elif os.name == 'nt':  # Windows
             subprocess.run(["taskkill", "/F", "/IM", "chrome.exe"], check=False)
         logging.info("Procesos de Chrome cerrados correctamente.")
     except Exception as e:
@@ -44,6 +44,11 @@ try:
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+
+    # Crear un directorio temporal único para evitar conflictos con `user-data-dir`
+    user_data_dir = tempfile.mkdtemp()
+    chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
+    logging.debug(f"Usando directorio temporal para user-data-dir: {user_data_dir}")
 
     # Inicializar el servicio de ChromeDriver
     logging.debug("Inicializando el servicio de ChromeDriver...")
