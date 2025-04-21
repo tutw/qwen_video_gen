@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+import os
 
 # Configuración del sistema de logging
 logging.basicConfig(
@@ -49,11 +50,41 @@ try:
 
         # Localizar y hacer clic en el botón especificado
         logging.debug("Buscando el botón para hacer clic...")
-        button = WebDriverWait(driver, 20).until(
+        initial_button = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div/div/div/form/div[3]/div/button'))
         )
-        button.click()
+        initial_button.click()
         logging.info("Se hizo clic en el botón correctamente.")
+
+        # Obtener credenciales desde los secretos de GitHub Actions
+        email = os.environ.get("LOGIN_EMAIL")
+        password = os.environ.get("LOGIN_PASSWORD")
+        if not email or not password:
+            raise ValueError("Las credenciales no están configuradas en las variables de entorno.")
+
+        # Localizar y rellenar el campo de email
+        logging.debug("Rellenando el campo de email...")
+        email_field = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div[1]/div/div/form/div[2]/div[1]/input'))
+        )
+        email_field.send_keys(email)
+        logging.info("Campo de email rellenado correctamente.")
+
+        # Localizar y rellenar el campo de contraseña
+        logging.debug("Rellenando el campo de contraseña...")
+        password_field = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div[1]/div/div/form/div[2]/div[2]/span/input'))
+        )
+        password_field.send_keys(password)
+        logging.info("Campo de contraseña rellenado correctamente.")
+
+        # Localizar y hacer clic en el botón de envío
+        logging.debug("Haciendo clic en el botón de envío...")
+        submit_button = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[1]/div[3]/div[1]/div/div/form/div[4]/button'))
+        )
+        submit_button.click()
+        logging.info("Se hizo clic en el botón de envío correctamente.")
 
     finally:
         # Cerrar el navegador
