@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 
@@ -11,8 +12,8 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("debug.log"),  # Registrar en un archivo
-        logging.StreamHandler()  # Mostrar en consola
+        logging.FileHandler("debug.log"),
+        logging.StreamHandler()
     ]
 )
 
@@ -24,12 +25,15 @@ try:
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Ejecución sin interfaz gráfica
     chrome_options.add_argument("--disable-gpu")  # Deshabilitar GPU
-    chrome_options.add_argument("--no-sandbox")  # Necesario en entornos como GitHub Actions
+    chrome_options.add_argument("--no-sandbox")  # Necesario en entornos de CI/CD
     chrome_options.add_argument("--disable-dev-shm-usage")  # Evitar problemas de memoria compartida
 
-    # Configurar ChromeDriver con webdriver-manager
-    logging.debug("Inicializando el navegador Chrome con webdriver-manager...")
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    # Configurar el servicio de ChromeDriver utilizando webdriver-manager
+    logging.debug("Inicializando el servicio de ChromeDriver con webdriver-manager...")
+    service = Service(ChromeDriverManager().install())
+
+    # Inicializar el navegador Chrome
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
         # Acceder a la URL
