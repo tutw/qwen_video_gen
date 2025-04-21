@@ -1,3 +1,4 @@
+import logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -6,49 +7,72 @@ from selenium.webdriver.chrome.options import Options
 import time
 import os
 
-# Configurar opciones de Chrome
-chrome_options = Options()
-chrome_options.add_argument("--headless")  # Ejecutar en modo headless (sin interfaz gráfica)
-chrome_options.add_argument("--disable-gpu")
-chrome_options.add_argument("--no-sandbox")  # Requerido en algunos entornos como servidores
-chrome_options.add_argument("--disable-dev-shm-usage")  # Manejo de memoria compartida
+# Configurar el sistema de logging
+logging.basicConfig(
+    level=logging.DEBUG,  # Cambia a logging.INFO si no necesitas tantos detalles
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("debug.log"),  # Guarda los logs en un archivo
+        logging.StreamHandler()  # También muestra los logs en la consola
+    ]
+)
 
-# Configurar el servicio de ChromeDriver
-chromedriver_path = "chromedriver"  # Asegúrate de que el binario de ChromeDriver esté en tu PATH o especifica la ruta completa
-service = Service(chromedriver_path)
-
-# Inicializar el controlador del navegador
-driver = webdriver.Chrome(service=service, options=chrome_options)
+logging.info("Iniciando el script...")
 
 try:
-    # Acceder a la URL
-    driver.get("https://chat.qwen.ai/c/07a3d948-a17e-461a-90e6-41675255ec6c")
-    print("Accediendo a la página...")
-    time.sleep(5)  # Esperar que la página cargue completamente
+    # Configurar opciones de Chrome
+    logging.debug("Configurando opciones de Chrome...")
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Ejecutar en modo headless (sin interfaz gráfica)
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")  # Requerido en algunos entornos como servidores
+    chrome_options.add_argument("--disable-dev-shm-usage")  # Manejo de memoria compartida
 
-    # Encontrar la caja de texto donde se escribe el prompt
-    prompt_box = driver.find_element(By.TAG_NAME, 'textarea')
-    prompt_text = "un gato jugando con una bola de papel"
-    print(f"Enviando prompt: {prompt_text}")
-    prompt_box.send_keys(prompt_text)
-    prompt_box.send_keys(Keys.RETURN)  # Simular presionar Enter
-    time.sleep(10)  # Esperar que se genere el video
+    # Configurar el servicio de ChromeDriver
+    logging.debug("Configurando el servicio de ChromeDriver...")
+    chromedriver_path = "chromedriver"  # Asegúrate de que el binario de ChromeDriver esté en tu PATH o especifica la ruta completa
+    service = Service(chromedriver_path)
 
-    # Buscar el enlace al video generado
-    video_element = driver.find_element(By.XPATH, '//a[contains(@href, "cdn.qwenlm.ai/output")]')
-    video_url = video_element.get_attribute('href')
-    print(f"URL del video generado: {video_url}")
+    logging.debug("Inicializando el navegador Chrome...")
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
-    # Guardar la URL en un archivo de texto
-    output_file = "video_url.txt"
-    with open(output_file, "w") as file:
-        file.write(f"URL del video generado: {video_url}\n")
-    print(f"URL guardada en {output_file}")
+    try:
+        # Acceder a la URL
+        url = "https://chat.qwen.ai/c/07a3d948-a17e-461a-90e6-41675255ec6c"
+        logging.info(f"Accediendo a la URL: {url}")
+        driver.get(url)
+        time.sleep(5)  # Esperar que la página cargue completamente
+
+        # Encontrar la caja de texto donde se escribe el prompt
+        logging.debug("Buscando la caja de texto para el prompt...")
+        prompt_box = driver.find_element(By.TAG_NAME, 'textarea')
+        prompt_text = "un gato jugando con una bola de papel"
+        logging.info(f"Enviando prompt: {prompt_text}")
+        prompt_box.send_keys(prompt_text)
+        prompt_box.send_keys(Keys.RETURN)  # Simular presionar Enter
+        time.sleep(10)  # Esperar que se genere el video
+
+        # Buscar el enlace al video generado
+        logging.debug("Buscando el enlace del video generado...")
+        video_element = driver.find_element(By.XPATH, '//a[contains(@href, "cdn.qwenlm.ai/output")]')
+        video_url = video_element.get_attribute('href')
+        logging.info(f"URL del video generado: {video_url}")
+
+        # Guardar la URL en un archivo de texto
+        output_file = "video_url.txt"
+        logging.debug(f"Guardando la URL en el archivo: {output_file}")
+        with open(output_file, "w") as file:
+            file.write(f"URL del video generado: {video_url}\n")
+        logging.info(f"URL guardada correctamente en {output_file}")
+
+    except Exception as e:
+        logging.error("Ocurrió un error durante la ejecución principal:", exc_info=True)
+
+    finally:
+        # Cerrar el navegador
+        logging.debug("Cerrando el navegador...")
+        driver.quit()
+        logging.info("Navegador cerrado.")
 
 except Exception as e:
-    print(f"Ocurrió un error: {e}")
-
-finally:
-    # Cerrar el navegador
-    driver.quit()
-    print("Navegador cerrado.")
+    logging.critical("Fallo crítico al iniciar el script:", exc_info=True)
